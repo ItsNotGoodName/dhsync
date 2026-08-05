@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 	"time"
@@ -19,29 +20,39 @@ func main() {
 
 	ctx := context.Background()
 
-	c := dahuarpc.NewClient("192.168.6.14", os.Getenv("IPC_USERNAME"), os.Getenv("IPC_PASSWORD"))
-	defer c.Close(context.Background())
-
-	_, err = config.GetVideoInMode(ctx, c)
-	if err != nil {
-		log.Fatal("Failed to GetVideoInMode", err)
+	ips := []string{
+		"192.168.60.11",
+		"192.168.60.12",
+		"192.168.60.13",
+		"192.168.60.14",
+		"192.168.60.15",
+		"192.168.60.16",
+		"192.168.60.17",
 	}
 
-	// fmt.Println("SN:", data)
+	for _, ip := range ips {
+		c := dahuarpc.NewClient(ip, os.Getenv("IPC_USERNAME"), os.Getenv("IPC_PASSWORD"))
+		defer c.Close(context.Background())
 
-	// fmt.Println("Build:", data.Build, "BuildDate:", data.BuildDate, "Version", data.Version)
-	// for _, d := range data.Tables {
-	// 	pp.Println(d)
-	// }
+		data, err := config.GetVideoInMode(ctx, c)
+		if err != nil {
+			log.Fatal("Failed to SyncVideoInMode: ", err)
+		}
 
-	_, err = SyncVideoInMode2(ctx, c, SyncVideoInModeArgs{
-		Location:      time.Local,
-		Latitude:      48.751911,
-		Longitude:     -122.478683,
-		SunriseOffset: 0,
-		SunsetOffset:  0,
-	})
-	if err != nil {
-		log.Fatal("Failed to SyncVideoInMode: ", err)
+		fmt.Println("IPS", ip, ":", data.Tables[0].Data.SwitchMode(), data.Tables[0].Data.TimeSection[0][0])
+
+		_, err = SyncVideoInMode(ctx, c, CreateDayNightTimeSection(SyncVideoInModeArgs{
+			Location:      time.Local,
+			Latitude:      48.751911,
+			Longitude:     -122.478683,
+			SunriseOffset: 0,
+			SunsetOffset:  0,
+		}))
+		if err != nil {
+			log.Fatal("Failed to SyncVideoInMode: ", err)
+		}
+
+		c.Close(ctx)
 	}
+
 }

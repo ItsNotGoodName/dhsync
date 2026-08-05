@@ -3,8 +3,8 @@ module github.com/ItsNotGoodName/dhsync
 go 1.26.5
 
 require (
-	github.com/ItsNotGoodName/dhapi-go v0.0.0-20250204192211-add599de9af1
-	github.com/joho/godotenv v1.5.1
+	github.com/ItsNotGoodName/dhapi-go v0.0.0-20260730093936-777b21f8529c
+	github.com/goccy/go-yaml v1.19.2
 	github.com/nathan-osman/go-sunrise v1.1.0
 )
 
@@ -15,4 +15,4 @@ require (
 	github.com/tidwall/sjson v1.2.5 // indirect
 )
 
-replace github.com/ItsNotGoodName/dhapi-go => ../dhapi-go/
+// replace github.com/ItsNotGoodName/dhapi-go => ../dhapi-go/

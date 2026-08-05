@@ -13,7 +13,7 @@ import (
 )
 
 type SyncVideoInModeArgs struct {
-	Location      *time.Location
+	Timezone      *time.Location
 	Latitude      float64
 	Longitude     float64
 	SunriseOffset time.Duration
@@ -22,8 +22,8 @@ type SyncVideoInModeArgs struct {
 
 func (args SyncVideoInModeArgs) sunriseSunset(now time.Time) (time.Time, time.Time) {
 	srise, sset := sunrise.SunriseSunset(args.Latitude, args.Longitude, now.Year(), now.Month(), now.Day())
-	srise = srise.In(args.Location).Add(args.SunriseOffset)
-	sset = sset.In(args.Location).Add(args.SunsetOffset)
+	srise = srise.In(args.Timezone).Add(args.SunriseOffset)
+	sset = sset.In(args.Timezone).Add(args.SunsetOffset)
 	return srise, sset
 }
 

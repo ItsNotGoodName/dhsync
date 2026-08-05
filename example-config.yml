@@ -1,0 +1,19 @@
+latitude: 34.0522
+longitude: -118.2437
+timezone: America/Los_Angeles
+
+# Camera defaults
+username: admin
+password: password
+sunrise_offset: 30m
+sunset_offset: -1h30m
+
+# Camera list
+cameras:
+  - ip: 192.168.1.108
+  - ip: 192.168.1.109
+    sunset_offset: 20m
+  - ip: 192.168.1.110
+    name: FriendlyNameForLogging
+    username: OverideDefaultUser
+    password: OverideDefaultPassword123

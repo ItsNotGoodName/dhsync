@@ -1,5 +1,5 @@
 # yaml-language-server: https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/github-workflow.json
-name: Deploy Nightly
+name: Nightly
 on:
   schedule:
     - cron: "0 2 * * *" # run at 2 AM UTC

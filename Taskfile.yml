@@ -38,6 +38,31 @@ tasks:
       LDFLAGS: -s -w -X {{.BUILD_PACKAGE_NAME}}.Version={{.BUILD_VERSION}} -X {{.BUILD_PACKAGE_NAME}}.Commit={{.BUILD_COMMIT}} -X {{.BUILD_PACKAGE_NAME}}.Date={{.BUILD_DATE}}
       PACKAGE: "{{.PACKAGE_NAME}}/cmd/{{.CMD_NAME}}"
 
+  build-release:
+    internal: true
+    cmds:
+      - go generate ./...
+      - go mod tidy
+      - GOOS=linux GOARCH=amd64       go build -ldflags="{{.LDFLAGS}}" -o ./dist/{{.CMD_NAME}}_Linux_x86_64/{{.CMD_NAME}}       {{.PACKAGE}}
+      - GOOS=linux GOARCH=arm GOARM=7 go build -ldflags="{{.LDFLAGS}}" -o ./dist/{{.CMD_NAME}}_Linux_armv7/{{.CMD_NAME}}        {{.PACKAGE}}
+      - GOOS=linux GOARCH=arm64       go build -ldflags="{{.LDFLAGS}}" -o ./dist/{{.CMD_NAME}}_Linux_arm64/{{.CMD_NAME}}        {{.PACKAGE}}
+      - GOOS=darwin GOARCH=arm64      go build -ldflags="{{.LDFLAGS}}" -o ./dist/{{.CMD_NAME}}_Darwin_arm64/{{.CMD_NAME}}       {{.PACKAGE}}
+      - GOOS=windows GOARCH=amd64     go build -ldflags="{{.LDFLAGS}}" -o ./dist/{{.CMD_NAME}}_Windows_x86_64/{{.CMD_NAME}}.exe {{.PACKAGE}}
+      - mkdir -p ./dist/linux     && ln -rsf ./dist/{{.CMD_NAME}}_Linux_x86_64 ./dist/linux/amd64
+      - mkdir -p ./dist/linux/arm && ln -rsf ./dist/{{.CMD_NAME}}_Linux_armv7  ./dist/linux/arm/v7
+      - mkdir -p ./dist/linux     && ln -rsf ./dist/{{.CMD_NAME}}_Linux_arm64  ./dist/linux/arm64
+    env:
+      CGO_ENABLED: 0
+    vars:
+      BUILD_PACKAGE_NAME: "{{.PACKAGE_NAME}}"
+      BUILD_VERSION: "${VERSION}"
+      BUILD_DATE: '{{now | date "2006-01-02T15:04:05Z07:00"}}'
+      BUILD_COMMIT:
+        sh: git rev-parse HEAD
+
+      LDFLAGS: -s -w -X {{.BUILD_PACKAGE_NAME}}.Version={{.BUILD_VERSION}} -X {{.BUILD_PACKAGE_NAME}}.Commit={{.BUILD_COMMIT}} -X {{.BUILD_PACKAGE_NAME}}.Date={{.BUILD_DATE}}
+      PACKAGE: "{{.PACKAGE_NAME}}/cmd/{{.CMD_NAME}}"
+
   compile-artifacts:
     internal: true
     dir: dist
@@ -60,4 +85,10 @@ tasks:
     deps: [clean]
     cmds:
       - task: build-nightly
+      - task: compile-artifacts
+
+  release:
+    deps: [clean]
+    cmds:
+      - task: build-release
       - task: compile-artifacts

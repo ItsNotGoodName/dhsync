@@ -12,6 +12,7 @@ Create the file `config.yml` with the following content.
 
 ```yml
 ---
+healthcheck_url: "https://hc-ping.com/d5f22685-6129-4682-8960-2bcb47fadc89"
 latitude: 34.0522
 longitude: -118.2437
 timezone: America/Los_Angeles

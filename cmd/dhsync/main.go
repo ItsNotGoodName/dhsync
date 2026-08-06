@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"time"
 
@@ -13,7 +14,6 @@ import (
 	"github.com/ItsNotGoodName/dhapi-go/dahuarpc/modules/configmanager/config"
 	"github.com/ItsNotGoodName/dhsync"
 	"github.com/Rican7/lieut"
-	"github.com/k0kubun/pp"
 )
 
 var (
@@ -52,14 +52,25 @@ func Sync(ctx context.Context, arguments []string) error {
 		return err
 	}
 
+	passed := true
 	for _, camera := range cfg.Cameras {
 		err := SyncCamera(ctx, camera)
+		if err != nil {
+			if errors.Is(err, context.Canceled) {
+				return err
+			}
+			passed = false
+		}
+	}
+
+	if passed {
+		err := Ping(ctx, cfg.Healthcheck_Url)
 		if err != nil && errors.Is(err, context.Canceled) {
 			return err
 		}
 	}
 
-	return err
+	return nil
 }
 
 func Daemon(ctx context.Context, arguments []string) error {
@@ -69,8 +80,19 @@ func Daemon(ctx context.Context, arguments []string) error {
 	}
 
 	for {
+		passed := true
 		for _, camera := range cfg.Cameras {
 			err := SyncCamera(ctx, camera)
+			if err != nil {
+				if errors.Is(err, context.Canceled) {
+					return err
+				}
+				passed = false
+			}
+		}
+
+		if passed {
+			err := Ping(ctx, cfg.Healthcheck_Url)
 			if err != nil && errors.Is(err, context.Canceled) {
 				return err
 			}
@@ -118,7 +140,13 @@ func PrintCamera(ctx context.Context, camera dhsync.ConfigCamera) error {
 		return err
 	}
 
-	pp.Println(data.Tables)
+	for i, channel := range data.Tables {
+		if len(channel.Data.TimeSectionV2) == 12 {
+			fmt.Println("Name:", camera.Name, "Channel:", i+1, "SwitchMode:", channel.Data.SwitchMode(), "TimeSection:", channel.Data.TimeSectionV2[time.Now().Month()-1])
+		} else {
+			fmt.Println("Name:", camera.Name, "Channel:", i+1, "SwitchMode:", channel.Data.SwitchMode(), "TimeSection:", channel.Data.TimeSection[0][0])
+		}
+	}
 
 	return nil
 }
@@ -141,9 +169,18 @@ func SyncCamera(ctx context.Context, camera dhsync.ConfigCamera) error {
 		SunsetOffset:  camera.Sunset_Offset_P,
 	}
 
+	if len(data.Tables) == 0 {
+		err := errors.New("camera has no channels")
+		log.Println("ERROR:", err)
+		return err
+	}
+
 	// Check if time plan capable
 	if len(data.Tables[0].Data.TimeSectionV2) == 12 {
-		fmt.Println("SYNCING", camera.Name, "\n\tPREVIOUS SwitchMode:", data.Tables[0].Data.SwitchMode(), "TimeSection:", data.Tables[0].Data.TimeSectionV2[0])
+		fmt.Println("SYNCING", camera.Name)
+		for i := range data.Tables {
+			fmt.Println("\tPREVIOUS Channel:", i+1, "SwitchMode:", data.Tables[i].Data.SwitchMode(), "TimeSection:", data.Tables[i].Data.TimeSectionV2[0])
+		}
 
 		data, err = dhsync.SyncVideoInMode2(ctx, c, dhsync.CreateDayNightTimeSection2(syncArgs))
 		if err != nil {
@@ -151,17 +188,45 @@ func SyncCamera(ctx context.Context, camera dhsync.ConfigCamera) error {
 			return err
 		}
 
-		fmt.Println("\tCURRENT SwitchMode:", data.Tables[0].Data.SwitchMode(), "TimeSection:", data.Tables[0].Data.TimeSectionV2[0])
+		for i := range data.Tables {
+			fmt.Println("\tCURRENT Channel:", i+1, "SwitchMode:", data.Tables[i].Data.SwitchMode(), "TimeSection:", data.Tables[i].Data.TimeSectionV2[0])
+		}
 	} else {
-		fmt.Println("SYNCING", camera.Name, "\n\tPREVIOUS SwitchMode:", data.Tables[0].Data.SwitchMode(), "TimeSection:", data.Tables[0].Data.TimeSection[0][0])
+		fmt.Println("SYNCING", camera.Name)
+		for i := range data.Tables {
+			fmt.Println("\tPREVIOUS Channel:", i+1, "SwitchMode:", data.Tables[i].Data.SwitchMode(), "TimeSection:", data.Tables[i].Data.TimeSection[0][0])
+		}
 
 		data, err = dhsync.SyncVideoInMode(ctx, c, dhsync.CreateDayNightTimeSection(syncArgs))
 		if err != nil {
-			log.Println("Failed to SyncVideoInMode:", err)
+			log.Println("ERROR: SyncVideoInMode:", err)
 			return err
 		}
 
-		fmt.Println("\tCURRENT SwitchMode:", data.Tables[0].Data.SwitchMode(), "TimeSection:", data.Tables[0].Data.TimeSection[0][0])
+		for i := range data.Tables {
+			fmt.Println("\tCURRENT Channel:", i+1, "SwitchMode:", data.Tables[i].Data.SwitchMode(), "TimeSection:", data.Tables[i].Data.TimeSection[0][0])
+		}
+	}
+
+	return nil
+}
+
+func Ping(ctx context.Context, url string) error {
+	if url == "" {
+		return nil
+	}
+
+	var client = &http.Client{
+		Timeout: 10 * time.Second,
+	}
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodHead, url, nil)
+	if err != nil {
+		return err
+	}
+	_, err = client.Do(req)
+	if err != nil {
+		fmt.Println("ERROR: pinging health check url:", err)
 	}
 
 	return nil

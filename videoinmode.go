@@ -107,8 +107,8 @@ func SyncVideoInMode2(ctx context.Context, c dahuarpc.Conn, monthTimeSections [1
 	// Apply to each channel
 	for channelIdx := range cfg.Tables {
 		// Sync SwitchMode
-		if cfg.Tables[channelIdx].Data.SwitchMode() != config.SwitchModeProfiles {
-			cfg.Tables[channelIdx].Data.SetSwitchMode(config.SwitchModeProfiles)
+		if cfg.Tables[channelIdx].Data.SwitchMode() != config.SwitchModeTimePlan {
+			cfg.Tables[channelIdx].Data.SetSwitchMode(config.SwitchModeTimePlan)
 			changed = true
 		}
 

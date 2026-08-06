@@ -1,5 +1,7 @@
 github.com/ItsNotGoodName/dhapi-go v0.0.0-20260730093936-777b21f8529c h1:vLgngkcoYiz2W4H28RUaw8disKMsmef/MZHps5jYwPU=
 github.com/ItsNotGoodName/dhapi-go v0.0.0-20260730093936-777b21f8529c/go.mod h1:4a1dixE21F1Zm3BuEV4Z5f9Y6OQ3JEZYLyH+XGSdspE=
+github.com/Rican7/lieut v0.5.0 h1:Adxz7scc9juRbZc92qC/F6ZKOPM2pcFYmsIrhrc4vHg=
+github.com/Rican7/lieut v0.5.0/go.mod h1:7ZJew5W+9uZNlE3SL8W1wwhUqFWmb+1r0a1xl8zGeUs=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/goccy/go-yaml v1.19.2 h1:PmFC1S6h8ljIz6gMRBopkjP1TVT7xuwrButHID66PoM=

@@ -4,6 +4,7 @@ go 1.26.5
 
 require (
 	github.com/ItsNotGoodName/dhapi-go v0.0.0-20260730093936-777b21f8529c
+	github.com/Rican7/lieut v0.5.0
 	github.com/goccy/go-yaml v1.19.2
 	github.com/nathan-osman/go-sunrise v1.1.0
 )

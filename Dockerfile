@@ -2,7 +2,7 @@ FROM alpine
 
 WORKDIR /config
 
-ENTRYPOINT ["/usr/bin/dhsync", "--daemon"]
+ENTRYPOINT ["/usr/bin/dhsync", "daemon"]
 
 ARG TARGETPLATFORM
 

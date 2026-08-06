@@ -36,6 +36,15 @@ The following command will sync cameras located at `192.168.1.108`, `192.168.1.1
 dhsync sync
 ```
 
+
+### Run Daemon
+
+Run as a background service.
+
+```
+dhsync daemon
+```
+
 ### Verify Settings
 
 Shows day and night profiles currently on the cameras.

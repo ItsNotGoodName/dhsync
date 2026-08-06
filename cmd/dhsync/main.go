@@ -13,12 +13,11 @@ import (
 	"github.com/ItsNotGoodName/dhapi-go/dahuarpc/modules/configmanager/config"
 	"github.com/ItsNotGoodName/dhsync"
 	"github.com/Rican7/lieut"
-	"github.com/goccy/go-yaml"
+	"github.com/k0kubun/pp"
 )
 
 var (
 	configFile string
-	daemon     bool
 )
 
 func main() {
@@ -30,23 +29,41 @@ func main() {
 
 	globalFlags := flag.NewFlagSet(appInfo.Name, flag.ExitOnError)
 	globalFlags.StringVar(&configFile, "config", "config.yml", "Config file to load")
-	globalFlags.BoolVar(&daemon, "daemon", false, "Run in daemon mode")
 
-	app := lieut.NewSingleCommandApp(
+	app := lieut.NewMultiCommandApp(
 		appInfo,
-		Run,
 		globalFlags,
 		os.Stdout,
 		os.Stderr,
 	)
+
+	app.SetCommand(lieut.CommandInfo{Name: "sync"}, Sync, nil)
+	app.SetCommand(lieut.CommandInfo{Name: "daemon"}, Daemon, nil)
+	app.SetCommand(lieut.CommandInfo{Name: "verify"}, Verify, nil)
 
 	exitCode := app.Run(context.Background(), os.Args[1:])
 
 	os.Exit(exitCode)
 }
 
-func Run(ctx context.Context, arguments []string) error {
-	cfg, err := ReadConfig()
+func Sync(ctx context.Context, arguments []string) error {
+	cfg, err := dhsync.ReadConfig(configFile)
+	if err != nil {
+		return err
+	}
+
+	for _, camera := range cfg.Cameras {
+		err := SyncCamera(ctx, camera)
+		if err != nil && errors.Is(err, context.Canceled) {
+			return err
+		}
+	}
+
+	return err
+}
+
+func Daemon(ctx context.Context, arguments []string) error {
+	cfg, err := dhsync.ReadConfig(configFile)
 	if err != nil {
 		return err
 	}
@@ -59,10 +76,6 @@ func Run(ctx context.Context, arguments []string) error {
 			}
 		}
 
-		if !daemon {
-			break
-		}
-
 		fmt.Println("Sleeping for 24 hours...")
 		select {
 		case <-ctx.Done():
@@ -70,33 +83,44 @@ func Run(ctx context.Context, arguments []string) error {
 		case <-time.After(24 * time.Hour):
 		}
 
-		newCfg, err := ReadConfig()
+		newCfg, err := dhsync.ReadConfig(configFile)
 		if err != nil {
 			fmt.Println("ERROR: reading config file:", err)
 		} else {
 			cfg = newCfg
 		}
 	}
+}
+
+func Verify(ctx context.Context, arguments []string) error {
+	cfg, err := dhsync.ReadConfig(configFile)
+	if err != nil {
+		return err
+	}
+
+	for _, camera := range cfg.Cameras {
+		err := PrintCamera(ctx, camera)
+		if err != nil && errors.Is(err, context.Canceled) {
+			return err
+		}
+	}
 
 	return err
 }
 
-func ReadConfig() (dhsync.Config, error) {
-	data, err := os.ReadFile(configFile)
+func PrintCamera(ctx context.Context, camera dhsync.ConfigCamera) error {
+	c := dahuarpc.NewClient(camera.IP, camera.Username, camera.Password)
+	defer c.Close(context.Background())
+
+	data, err := config.GetVideoInMode(ctx, c)
 	if err != nil {
-		return dhsync.Config{}, err
+		log.Println("ERROR: SyncVideoInMode:", err)
+		return err
 	}
 
-	var cfg dhsync.Config
-	if err := yaml.Unmarshal(data, &cfg); err != nil {
-		return dhsync.Config{}, err
-	}
+	pp.Println(data.Tables)
 
-	if err := cfg.Parse(); err != nil {
-		return dhsync.Config{}, err
-	}
-
-	return cfg, nil
+	return nil
 }
 
 func SyncCamera(ctx context.Context, camera dhsync.ConfigCamera) error {

@@ -1,2 +1,2 @@
-.\dhsync.exe --daemon
+.\dhsync.exe daemon
 pause

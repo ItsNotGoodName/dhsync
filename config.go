@@ -1,6 +1,11 @@
 package dhsync
 
-import "time"
+import (
+	"os"
+	"time"
+
+	"github.com/goccy/go-yaml"
+)
 
 type Config struct {
 	Username string
@@ -31,7 +36,7 @@ type ConfigCamera struct {
 	Sunset_Offset_P  time.Duration `yaml:"-"`
 }
 
-func (c *Config) Parse() error {
+func (c *Config) parse() error {
 	for i := range c.Cameras {
 		// Default
 		if c.Cameras[i].Name == "" {
@@ -88,4 +93,22 @@ func (c *Config) Parse() error {
 	}
 
 	return nil
+}
+
+func ReadConfig(configFile string) (Config, error) {
+	data, err := os.ReadFile(configFile)
+	if err != nil {
+		return Config{}, err
+	}
+
+	var cfg Config
+	if err := yaml.Unmarshal(data, &cfg); err != nil {
+		return Config{}, err
+	}
+
+	if err := cfg.parse(); err != nil {
+		return Config{}, err
+	}
+
+	return cfg, nil
 }

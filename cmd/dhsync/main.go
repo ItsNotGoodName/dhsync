@@ -11,11 +11,10 @@ import (
 
 	"github.com/ItsNotGoodName/dhapi-go/dahuarpc"
 	"github.com/ItsNotGoodName/dhapi-go/dahuarpc/modules/configmanager/config"
+	"github.com/ItsNotGoodName/dhsync"
 	"github.com/Rican7/lieut"
 	"github.com/goccy/go-yaml"
 )
-
-var version = "dev"
 
 var (
 	configFile string
@@ -26,7 +25,7 @@ func main() {
 	appInfo := lieut.AppInfo{
 		Name:    "dhsync",
 		Summary: "Sync day and night profile on Dahua cameras.",
-		Version: version,
+		Version: dhsync.Version,
 	}
 
 	globalFlags := flag.NewFlagSet(appInfo.Name, flag.ExitOnError)
@@ -82,25 +81,25 @@ func Run(ctx context.Context, arguments []string) error {
 	return err
 }
 
-func ReadConfig() (Config, error) {
+func ReadConfig() (dhsync.Config, error) {
 	data, err := os.ReadFile(configFile)
 	if err != nil {
-		return Config{}, err
+		return dhsync.Config{}, err
 	}
 
-	var cfg Config
+	var cfg dhsync.Config
 	if err := yaml.Unmarshal(data, &cfg); err != nil {
-		return Config{}, err
+		return dhsync.Config{}, err
 	}
 
 	if err := cfg.Parse(); err != nil {
-		return Config{}, err
+		return dhsync.Config{}, err
 	}
 
 	return cfg, nil
 }
 
-func SyncCamera(ctx context.Context, camera ConfigCamera) error {
+func SyncCamera(ctx context.Context, camera dhsync.ConfigCamera) error {
 	c := dahuarpc.NewClient(camera.IP, camera.Username, camera.Password)
 	defer c.Close(context.Background())
 
@@ -110,7 +109,7 @@ func SyncCamera(ctx context.Context, camera ConfigCamera) error {
 		return err
 	}
 
-	syncArgs := SyncVideoInModeArgs{
+	syncArgs := dhsync.SyncVideoInModeArgs{
 		Timezone:      camera.Timezone_P,
 		Latitude:      camera.Latitude,
 		Longitude:     camera.Longitude,
@@ -122,7 +121,7 @@ func SyncCamera(ctx context.Context, camera ConfigCamera) error {
 	if len(data.Tables[0].Data.TimeSectionV2) == 12 {
 		fmt.Println("SYNCING", camera.Name, "\n\tPREVIOUS SwitchMode:", data.Tables[0].Data.SwitchMode(), "TimeSection:", data.Tables[0].Data.TimeSectionV2[0])
 
-		data, err = SyncVideoInMode2(ctx, c, CreateDayNightTimeSection2(syncArgs))
+		data, err = dhsync.SyncVideoInMode2(ctx, c, dhsync.CreateDayNightTimeSection2(syncArgs))
 		if err != nil {
 			log.Println("ERROR: SyncVideoInMode2:", err)
 			return err
@@ -132,7 +131,7 @@ func SyncCamera(ctx context.Context, camera ConfigCamera) error {
 	} else {
 		fmt.Println("SYNCING", camera.Name, "\n\tPREVIOUS SwitchMode:", data.Tables[0].Data.SwitchMode(), "TimeSection:", data.Tables[0].Data.TimeSection[0][0])
 
-		data, err = SyncVideoInMode(ctx, c, CreateDayNightTimeSection(syncArgs))
+		data, err = dhsync.SyncVideoInMode(ctx, c, dhsync.CreateDayNightTimeSection(syncArgs))
 		if err != nil {
 			log.Println("Failed to SyncVideoInMode:", err)
 			return err

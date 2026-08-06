@@ -1,4 +1,4 @@
-package main
+package dhsync
 
 import "time"
 

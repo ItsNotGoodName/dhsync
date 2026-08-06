@@ -1,0 +1,2 @@
+.\dhsync.exe --daemon
+pause

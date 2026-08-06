@@ -17,7 +17,8 @@ jobs:
           submodules: true
 
       - name: Set version
-        run: echo "VERSION=$(git tag --points-at HEAD)" >> $GITHUB_ENV
+        run: |
+          echo "VERSION=$(git tag --points-at HEAD)" >> $GITHUB_ENV
 
       - name: Create release
         env:
@@ -37,7 +38,8 @@ jobs:
           fetch-depth: 0
 
       - name: Set version
-        run: echo "VERSION=$(git tag --points-at HEAD)" >> $GITHUB_ENV
+        run: |
+          echo "VERSION=$(git tag --points-at HEAD)" >> $GITHUB_ENV
 
       - name: Set up Go
         uses: actions/setup-go@v4
@@ -56,7 +58,7 @@ jobs:
           GH_REPO: ${{ github.repository }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release upload $VERSION dist/*
+          gh release upload $VERSION dist/artifacts/*
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -72,4 +74,4 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and publish docker release
-        run: docker buildx build . -f Dockerfile -t ghcr.io/itsnotgoodname/dhsync:$VERSION --provenance=false --platform=linux/amd64,linux/arm/v7,linux/arm64/v8 --push
+        run: docker buildx build . -f Dockerfile -t ghcr.io/itsnotgoodname/dhsync:latest -t ghcr.io/itsnotgoodname/dhsync:$VERSION --provenance=false --platform=linux/amd64,linux/arm/v7,linux/arm64/v8 --push

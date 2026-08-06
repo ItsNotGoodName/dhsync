@@ -37,9 +37,9 @@ func main() {
 		os.Stderr,
 	)
 
-	app.SetCommand(lieut.CommandInfo{Name: "sync"}, Sync, nil)
-	app.SetCommand(lieut.CommandInfo{Name: "daemon"}, Daemon, nil)
-	app.SetCommand(lieut.CommandInfo{Name: "verify"}, Verify, nil)
+	app.SetCommand(lieut.CommandInfo{Name: "sync", Summary: "Sync day and night profiles."}, Sync, nil)
+	app.SetCommand(lieut.CommandInfo{Name: "daemon", Summary: "Sync every 24 hours."}, Daemon, nil)
+	app.SetCommand(lieut.CommandInfo{Name: "read", Summary: "Read current day and night profiles."}, Read, nil)
 
 	exitCode := app.Run(context.Background(), os.Args[1:])
 
@@ -92,7 +92,7 @@ func Daemon(ctx context.Context, arguments []string) error {
 	}
 }
 
-func Verify(ctx context.Context, arguments []string) error {
+func Read(ctx context.Context, arguments []string) error {
 	cfg, err := dhsync.ReadConfig(configFile)
 	if err != nil {
 		return err

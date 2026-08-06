@@ -68,18 +68,18 @@ func SyncVideoInMode(ctx context.Context, c dahuarpc.Conn, timeSection dahuarpc.
 }
 
 func CreateDayNightTimeSection2(args SyncVideoInModeArgs) [12][]dahuarpc.TimeSection2 {
-	var r [12][]dahuarpc.TimeSection2
+	var monthTimeSections [12][]dahuarpc.TimeSection2
 
 	now := time.Now()
 
-	for i := range 12 {
+	for monthIdx := range 12 {
 		// The current month should get sunrise and sunset for the current day.
 		// The following months should get it for the first day of that month.
 		var d time.Time
-		if i == 0 {
-			d = now.AddDate(0, i, 0)
+		if monthIdx == 0 {
+			d = now.AddDate(0, monthIdx, 0)
 		} else {
-			d = now.AddDate(0, i, -now.Day())
+			d = now.AddDate(0, monthIdx, -now.Day())
 		}
 		sunrise, sunset := args.sunriseSunset(d)
 
@@ -89,10 +89,10 @@ func CreateDayNightTimeSection2(args SyncVideoInModeArgs) [12][]dahuarpc.TimeSec
 			dahuarpc.NewTimeSection2(dahuarpc.TimeSectionDuration(sunrise.Add(time.Second)), dahuarpc.TimeSectionDuration(sunset), config.ProfileDay),
 			dahuarpc.NewTimeSection2(dahuarpc.TimeSectionDuration(sunset.Add(time.Second)), 86400000000000, config.ProfileNight),
 		}
-		r[i] = timeSections
+		monthTimeSections[monthIdx] = timeSections
 	}
 
-	return r
+	return monthTimeSections
 }
 
 // SyncVideoInMode2 uses the new time plan for setting day and night profiles. This only works on cameras that have the new interface.

@@ -45,12 +45,12 @@ Run as a background service.
 dhsync daemon
 ```
 
-### Verify Settings
+### Read Settings
 
 Shows day and night profiles currently on the cameras.
 
 ```
-dhsync verify
+dhsync read
 ```
 
 

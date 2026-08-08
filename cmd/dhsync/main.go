@@ -142,7 +142,7 @@ func PrintCamera(ctx context.Context, camera dhsync.ConfigCamera) error {
 
 	for i, channel := range data.Tables {
 		if len(channel.Data.TimeSectionV2) == 12 {
-			fmt.Println("Name:", camera.Name, "Channel:", i+1, "SwitchMode:", channel.Data.SwitchMode(), "TimeSection:", channel.Data.TimeSectionV2[time.Now().Month()-1])
+			fmt.Println("Name:", camera.Name, "Channel:", i+1, "SwitchMode:", channel.Data.SwitchMode(), "TimeSection:", channel.Data.TimeSectionV2[time.Now().In(camera.Timezone_P).Month()-1])
 		} else {
 			fmt.Println("Name:", camera.Name, "Channel:", i+1, "SwitchMode:", channel.Data.SwitchMode(), "TimeSection:", channel.Data.TimeSection[0][0])
 		}
@@ -177,9 +177,11 @@ func SyncCamera(ctx context.Context, camera dhsync.ConfigCamera) error {
 
 	// Check if time plan capable
 	if len(data.Tables[0].Data.TimeSectionV2) == 12 {
+		monthIdx := time.Now().In(camera.Timezone_P).Month() - 1
+
 		fmt.Println("SYNCING", camera.Name)
 		for i := range data.Tables {
-			fmt.Println("\tPREVIOUS Channel:", i+1, "SwitchMode:", data.Tables[i].Data.SwitchMode(), "TimeSection:", data.Tables[i].Data.TimeSectionV2[0])
+			fmt.Println("\tPREVIOUS Channel:", i+1, "SwitchMode:", data.Tables[i].Data.SwitchMode(), "TimeSection:", data.Tables[i].Data.TimeSectionV2[monthIdx])
 		}
 
 		data, err = dhsync.SyncVideoInMode2(ctx, c, dhsync.CreateDayNightTimeSection2(syncArgs))
@@ -189,7 +191,7 @@ func SyncCamera(ctx context.Context, camera dhsync.ConfigCamera) error {
 		}
 
 		for i := range data.Tables {
-			fmt.Println("\tCURRENT Channel:", i+1, "SwitchMode:", data.Tables[i].Data.SwitchMode(), "TimeSection:", data.Tables[i].Data.TimeSectionV2[0])
+			fmt.Println("\tCURRENT Channel:", i+1, "SwitchMode:", data.Tables[i].Data.SwitchMode(), "TimeSection:", data.Tables[i].Data.TimeSectionV2[monthIdx])
 		}
 	} else {
 		fmt.Println("SYNCING", camera.Name)

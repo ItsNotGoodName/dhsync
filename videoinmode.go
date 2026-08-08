@@ -29,7 +29,7 @@ func (args SyncVideoInModeArgs) sunriseSunset(now time.Time) (time.Time, time.Ti
 
 func CreateDayNightTimeSection(args SyncVideoInModeArgs) dahuarpc.TimeSection {
 	// Calculate sunrise and sunset
-	sunrise, sunset := args.sunriseSunset(time.Now())
+	sunrise, sunset := args.sunriseSunset(time.Now().In(args.Timezone))
 	return dahuarpc.NewTimeSection(1, dahuarpc.TimeSectionDuration(sunrise), dahuarpc.TimeSectionDuration(sunset))
 }
 
@@ -70,7 +70,7 @@ func SyncVideoInMode(ctx context.Context, c dahuarpc.Conn, timeSection dahuarpc.
 func CreateDayNightTimeSection2(args SyncVideoInModeArgs) [12][]dahuarpc.TimeSection2 {
 	var monthTimeSections [12][]dahuarpc.TimeSection2
 
-	now := time.Now()
+	now := time.Now().In(args.Timezone)
 
 	for monthOffset := range 12 {
 		// The current month should get sunrise and sunset for the current day.
@@ -79,7 +79,7 @@ func CreateDayNightTimeSection2(args SyncVideoInModeArgs) [12][]dahuarpc.TimeSec
 		if monthOffset == 0 {
 			d = now.AddDate(0, monthOffset, 0)
 		} else {
-			d = now.AddDate(0, monthOffset, -now.Day())
+			d = now.AddDate(0, monthOffset, -now.Day()+1)
 		}
 		sunrise, sunset := args.sunriseSunset(d)
 

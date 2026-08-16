@@ -1,4 +1,4 @@
-package dhsync
+package build
 
 var (
 	Commit  = ""

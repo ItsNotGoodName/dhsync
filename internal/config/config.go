@@ -1,4 +1,4 @@
-package dhsync
+package config
 
 import (
 	"os"
@@ -20,10 +20,10 @@ type Config struct {
 
 	Healthcheck_Url string
 
-	Cameras []ConfigCamera
+	Cameras []Camera
 }
 
-type ConfigCamera struct {
+type Camera struct {
 	Name             string
 	IP               string
 	Username         string
@@ -97,7 +97,7 @@ func (c *Config) parse() error {
 	return nil
 }
 
-func ReadConfig(configFile string) (Config, error) {
+func Read(configFile string) (Config, error) {
 	data, err := os.ReadFile(configFile)
 	if err != nil {
 		return Config{}, err

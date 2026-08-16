@@ -1,12 +1,16 @@
 ---
-healthcheck_url: ""
+# Coordinates to calculate sunrise and sunset
 latitude: 0.0
 longitude: 0.0
-timezone: UTC
+
+timezone: "" # Optional, defaults to local machine's timezone
 sunrise_offset: ""
 sunset_offset: ""
 username: "admin"
 password: ""
 
+healthcheck_url: "" # URL to ping when all cameras successfully sync
+
 cameras:
   # - ip: 192.168.1.108
+  #   name: cam-01

@@ -25,7 +25,7 @@ var (
 func main() {
 	appInfo := lieut.AppInfo{
 		Name:    "dhsync",
-		Summary: "Sync day and night profile on Dahua cameras.",
+		Summary: "Sync day and night profile times on Dahua cameras.",
 		Version: build.Version,
 	}
 

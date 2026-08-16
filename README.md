@@ -1,6 +1,10 @@
 # dhsync
 
-Sync day and night profile on Dahua cameras.
+Sync day and night profile times on Dahua cameras.
+
+Dahua cameras are capable of having custom video settings for day and night.
+The camera can switch between day and night using a fixed daily schedule or time plan on newer cameras.
+This program calculate the sunrise and sunset for you location and syncs it with the schedule or time plan.
 
 ## Usage
 
@@ -31,16 +35,15 @@ cameras:
     password: OverideDefaultPassword123
 ```
 
-The following command will sync cameras located at `192.168.1.108`, `192.168.1.109`, `192.168.1.110`.
+The following command will sync cameras at `192.168.1.108`, `192.168.1.109`, `192.168.1.110`.
 
 ```
 dhsync sync
 ```
 
-
 ### Run Daemon
 
-Run as a background service.
+Run as a background service that syncs every 24 hours.
 
 ```
 dhsync daemon
@@ -48,16 +51,14 @@ dhsync daemon
 
 ### Read Settings
 
-Shows day and night profiles currently on the cameras.
+Shows day and night profile times currently on the cameras.
 
 ```
 dhsync read
 ```
-
 
 ### Show Version
 
 ```
 dhsync --version
 ```
-

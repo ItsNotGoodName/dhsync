@@ -6,6 +6,11 @@ Dahua cameras are capable of having custom video settings for day and night.
 The camera can switch between day and night using a fixed daily schedule or time plan on newer cameras.
 This program calculate the sunrise and sunset for you location and syncs it with the schedule or time plan.
 
+## Output
+
+![Schedule](./docs/schedule.png)
+![Time Plan](./docs/time-plan.png)
+
 ## Usage
 
 See [example-config.yml](./example-config.yml) for a starter configuration.

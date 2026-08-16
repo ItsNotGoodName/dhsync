@@ -4,18 +4,11 @@ Sync day and night profile times on Dahua cameras.
 
 Dahua cameras are capable of having custom video settings for day and night.
 The camera can switch between day and night using a fixed daily schedule or time plan on newer cameras.
-This program calculate the sunrise and sunset for you location and syncs it with the schedule or time plan.
+They can also switch automatically but I find that unreliable.
 
-## Output
+This program calculate the sunrise and sunset for your location and syncs it with the schedule or time plan.
 
-![Schedule](./docs/schedule.png)
-![Time Plan](./docs/time-plan.png)
-
-## Usage
-
-See [example-config.yml](./example-config.yml) for a starter configuration.
-
-### Example
+## Example
 
 Create the file `config.yml` with the following content.
 
@@ -46,6 +39,18 @@ The following command will sync cameras at `192.168.1.108`, `192.168.1.109`, `19
 dhsync sync
 ```
 
+## Usage
+
+See [example-config.yml](./example-config.yml) for a starter configuration.
+
+### Run
+
+Run only once.
+
+```
+dhsync sync
+```
+
 ### Run Daemon
 
 Run as a background service that syncs every 24 hours.
@@ -67,3 +72,13 @@ dhsync read
 ```
 dhsync --version
 ```
+
+## Output
+
+### Schedule
+
+![Schedule](./docs/schedule.png)
+
+### Time Plan
+
+![Time Plan](./docs/time-plan.png)

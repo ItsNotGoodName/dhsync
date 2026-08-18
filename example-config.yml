@@ -10,6 +10,7 @@ username: "admin"
 password: ""
 
 healthcheck_url: "" # URL to ping when all cameras successfully sync
+healthcheck_fail_url: "" # URL to ping when at least a single cameras fails to sync
 
 cameras:
   # - ip: 192.168.1.108

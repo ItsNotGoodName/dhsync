@@ -18,7 +18,8 @@ type Config struct {
 	Sunrise_Offset string
 	Sunset_Offset  string
 
-	Healthcheck_Url string
+	Healthcheck_Url      string
+	Healthcheck_Fail_Url string
 
 	Cameras []Camera
 }

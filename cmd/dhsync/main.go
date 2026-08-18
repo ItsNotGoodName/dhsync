@@ -65,11 +65,9 @@ func Sync(ctx context.Context, arguments []string) error {
 		}
 	}
 
-	if passed {
-		err := Ping(ctx, cfg.Healthcheck_Url)
-		if err != nil && errors.Is(err, context.Canceled) {
-			return err
-		}
+	err = Ping(ctx, passed, cfg.Healthcheck_Url, cfg.Healthcheck_Fail_Url)
+	if err != nil && errors.Is(err, context.Canceled) {
+		return err
 	}
 
 	return nil
@@ -93,11 +91,9 @@ func Daemon(ctx context.Context, arguments []string) error {
 			}
 		}
 
-		if passed {
-			err := Ping(ctx, cfg.Healthcheck_Url)
-			if err != nil && errors.Is(err, context.Canceled) {
-				return err
-			}
+		err := Ping(ctx, passed, cfg.Healthcheck_Url, cfg.Healthcheck_Fail_Url)
+		if err != nil && errors.Is(err, context.Canceled) {
+			return err
 		}
 
 		fmt.Println("Sleeping for 24 hours...")
@@ -215,8 +211,15 @@ func SyncCamera(ctx context.Context, camera config.Camera) error {
 	return nil
 }
 
-func Ping(ctx context.Context, url string) error {
-	if url == "" {
+func Ping(ctx context.Context, success bool, successURL, failURL string) error {
+	pingUrl := ""
+	if success {
+		pingUrl = successURL
+	} else {
+		pingUrl = failURL
+	}
+
+	if pingUrl == "" {
 		return nil
 	}
 
@@ -224,7 +227,7 @@ func Ping(ctx context.Context, url string) error {
 		Timeout: 10 * time.Second,
 	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodHead, url, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodHead, successURL, nil)
 	if err != nil {
 		return err
 	}
